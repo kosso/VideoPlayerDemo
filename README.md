@@ -1,5 +1,8 @@
 # React Native tvOS VideoPlayerDemo 
 
+![screenshot](screenshot.png)
+
+
 While learning React and RN, this is a demo video player I managed to cobble togther. 
 
 It has a controls component which contains playback controls and a progress bar with focusable slider which works nicely with an Apple TV remote control. (Both types)
@@ -33,9 +36,6 @@ Clone this repo and cd into it..
 - `npx expo prebuild --clean`
 - `yarn ios`
 
-----------------
-
-![screenshot](screenshot.png)
 
 ----------------
 
