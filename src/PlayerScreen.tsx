@@ -26,17 +26,6 @@ type Status = Partial<AVPlaybackStatus> & {
     playablePercentage?: string; // 
 };
 
-
-interface VideoItem {
-    uri: string;
-    title?: string;
-}
-
-interface VideoSource {
-    uri: string;
-    type?: string;
-}
-
 const defaultStatus = {
     progressUpdateIntervalMillis: 500,
     playableDurationMillis: 0,
@@ -55,21 +44,69 @@ const defaultStatus = {
     error: null
 }
 
+interface VideoItem {
+    uri: string;
+    title?: string;
+}
+
+interface VideoSource {
+    uri: string;
+    type?: string;
+}
+
+interface PosterSource {
+    uri: string;
+}
+
+
+interface PlaylistItem {
+    title?:string,
+    posterSource?:PosterSource;
+    source: VideoSource
+}
+
+
 export const PlayerScreen = ({ }) => {
     // Fast-Forward/Rewind skip amount
     const _skip_ms = 5000;
-
     const video = useRef<Video>();
 
-    
+    const indexRef = useRef(0)
+    const playlist:PlaylistItem[] = [
+        {
+            title:'Big Buck Bunny',
+            source: {
+                uri:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                type:'hls'
+            }
+        },
+        {
+            title:'Tears Of Steel',
+            source: {
+                uri:'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4/.m3u8',
+                type:'hls'
+            }
+        },
+        {
+            title:'DJ Turntable',
+            source: {
+                uri:'https://test-streams.mux.dev/pts_shift/master.m3u8',
+                type:'hls'
+            }
+        },
+    ]
+
+
     // Data about the current video item
     const videoItem_Ref = useRef<VideoItem>();
     // Video status
     const status = useRef<Status>({ isPlaying: false });
 
+    const defaultPosterSource = require('@assets/images/placeholder-SMPTE-Color-Bars-HD.jpg')
+
     const backgroundImage = require('@assets/images/bg-spotlight.jpg');
     const [videoSource, setVideoSource] = useState<VideoSource>(null)
-    const [posterSource, setPosterSource] = useState(require('@assets/images/placeholder-SMPTE-Color-Bars-HD.jpg'))
+    const [posterSource, setPosterSource] = useState(defaultPosterSource)
 
 
     // These will be set via Controls component onMount.
@@ -152,7 +189,7 @@ export const PlayerScreen = ({ }) => {
 
             // Spacebar on sim and center select button.
             if (evt?.eventType === 'playPause') {
-                playPause();
+                togglePlayPause();
             }
         }
     });
@@ -186,7 +223,14 @@ export const PlayerScreen = ({ }) => {
         setup()
     }, [])
 
-    const playPause = () => {
+    const togglePlayPause = async () => {
+        if(!status.current?.isLoaded){
+
+            playVideoItem()
+            return
+        }
+
+
         // console.log('playPause', status.current)
         if (status.current?.isPlaying) {
             video.current.pauseAsync();
@@ -203,19 +247,51 @@ export const PlayerScreen = ({ }) => {
         setVideoSource({ uri: null })
     }
 
+    const playVideoItem = async (atIndex:number = indexRef.current) => {
+        if(!playlist?.length || !playlist[atIndex]?.source) return console.log('No playlist item source')
+        setVideoItemData(playlist[atIndex])
+        // loads the video source
+        setPosterSource(playlist[atIndex].posterSource ? playlist[atIndex].posterSource : defaultPosterSource)
+        setVideoSource(playlist[atIndex].source)
+        await video.current.playAsync();
+    }
+
+    const playNextItem = async () => {
+        if(!playlist?.length) return
+        console.log('play next ')
+        indexRef.current++
+        if(indexRef.current >= playlist.length) indexRef.current = 0
+        if(!playlist[indexRef.current]) return
+        await resetVideo()
+        playVideoItem(indexRef.current)
+    }
+    const playPreviousItem = async () => {
+        if(!playlist?.length) return
+        console.log('Play previous')
+        indexRef.current++
+        if(indexRef.current < 0) indexRef.current = playlist.length - 1
+        if(!playlist[indexRef.current]) return
+        await resetVideo()
+        playVideoItem(indexRef.current)
+    }
+
     const onLayoutRootView = useCallback(async () => {
         // Note: while developing, a file save will not run this again after the app renders. The useEffect will.
         // Expo: Click 'R' to do a full reload.
         console.log('onLayoutRootView')
-        // https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4/.m3u8
-        // https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+        
+        // LIVE Amazing TV Hls : https://178475.gvideo.io/mpegts/178475_695019/master_mpegts.m3u8'
+        // setVideoSource({
+        //     uri: 'https://test-streams.mux.dev/pts_shift/master.m3u8',
+        //     type: 'hls'
+        // });
 
-        // LIVE Hls : https://178475.gvideo.io/mpegts/178475_695019/master_mpegts.m3u8'
+        if(playlist?.length){
 
-        setVideoSource({
-            uri: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-            type: 'hls'
-        });
+       //     setVideoSource( playlist[indexRef.current].source )
+
+        }
+
 
     }, [])
 
@@ -271,9 +347,9 @@ export const PlayerScreen = ({ }) => {
                 ref={video}
                 source={videoSource}
                 usePoster
-                posterSource={posterSource}
+                posterSource={defaultPosterSource}
                 posterStyle={{
-                    resizeMode: 'contain',
+                    resizeMode: 'cover',
                 }}
                 shouldPlay={true}
                 resizeMode={ResizeMode.CONTAIN}
@@ -282,7 +358,7 @@ export const PlayerScreen = ({ }) => {
                 onPlaybackStatusUpdate={onPlaybackStatusUpdate}
 
             ></Video>
-            <Controls onMount={onControlsViewMount} video={video} videoItem={videoItem_Ref}></Controls>
+            <Controls onMount={onControlsViewMount} togglePlayPause={togglePlayPause} playNextItem={playNextItem} playPreviousItem={playPreviousItem}></Controls>
             
         </View>
 

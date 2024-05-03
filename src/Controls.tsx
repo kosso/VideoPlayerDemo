@@ -11,7 +11,8 @@ import IconStop from '@assets/icons/stop_no_circle.svg'
 import IconSkipPrev from '@assets/icons/skip_previous.svg'
 import IconSkipNext from '@assets/icons/skip_next.svg'
 
-export const Controls = ({ onMount, video, videoItem }) => {
+export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextItem }) => {
+
 
     const [currentStatus, setCurrentStatus] = useState<Status>();
     const [videoItemData, setVideoItemData] = useState<VideoItem>();
@@ -30,28 +31,14 @@ export const Controls = ({ onMount, video, videoItem }) => {
         currentFocusNameRef.current = name
     }
 
-    const togglePlayPause = async () => {
-        console.log('togglePlayPause')
-        if (currentStatus?.isPlaying) {
-            await video.current.pauseAsync();
-        } else {
-            await video.current.playAsync();
-        }
-    }
-
-    const playNextItem = async () => {
-        console.log('Play next item')
-    }
-    const playPrevItem = async () => {
-        console.log('Play previous item')
-    }
+    useEffect(() => {
+        videoItemData && console.log('VIDEO ITEM DATA:', videoItemData)
+    },[videoItemData])
 
     // Define onMount to supply interface back to parent when trigged by onLayout
     useEffect(() => {
         onMount([setCurrentStatus, setVideoItemData, currentFocusNameRef])
     }, [onMount]);
-
-
 
     const ControlButton = useMemo(() => {
         return ({ Icon, _ref, name, hpf = false, size = 120, iconSize = 100, callback = null }) => {
@@ -123,7 +110,7 @@ export const Controls = ({ onMount, video, videoItem }) => {
                 </View>
                 {/* Playback Control Buttons */}
                 <View style={{ flex: 0.3, backgroundColor: 'transparent', display: 'flex', gap: 50, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginLeft: 'auto', marginRight: 'auto' }}>
-                    <ControlButton callback={playPrevItem} Icon={IconSkipPrev} size={90} iconSize={60} _ref={skipPrevRef} name="skipPrev"></ControlButton>
+                    <ControlButton callback={playPreviousItem} Icon={IconSkipPrev} size={90} iconSize={60} _ref={skipPrevRef} name="skipPrev"></ControlButton>
                     <ControlButton callback={togglePlayPause} hpf={true} Icon={currentStatus?.isPlaying ? IconPause : IconPlay} _ref={playPauseRef} name="playPause"></ControlButton>
                     <ControlButton callback={playNextItem} Icon={IconSkipNext} size={90} iconSize={60} _ref={skipNextRef} name="skipNext"></ControlButton>
                 </View>
@@ -134,7 +121,9 @@ export const Controls = ({ onMount, video, videoItem }) => {
                     </Text>
                 </View>
             </TVFocusGuideView>
-
+            {
+                videoItemData && <Text style={{ fontWeight:'bold', fontSize:30, color:'white', textAlign:'center', marginTop:24}}>{ videoItemData.title }</Text>
+            }
 
 
 
