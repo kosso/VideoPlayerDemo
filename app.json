@@ -18,6 +18,12 @@
       ]
     ],
     "name": "VideoPlayerDemo",
-    "slug": "VideoPlayerDemo"
+    "slug": "VideoPlayerDemo",
+    "android": {
+      "package": "com.kosso.VideoPlayerDemo"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kosso.VideoPlayerDemo"
+    }
   }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	fill="white" viewBox="0 0 18 18"  xml:space="preserve">
+<style type="text/css">
+</style>
+<g>
+	<path stroke-width="0" d="M14.136,12.076C13.086,13.822,11.182,15,9,15c-3.308,0-6-2.691-6-6c0-3.308,2.692-6,6-6c2.188,0,4.091,1.187,5.139,2.94
+		l1.333-0.715C14.172,2.999,11.763,1.5,9,1.5C4.86,1.5,1.5,4.86,1.5,9c0,4.141,3.36,7.5,7.5,7.5c2.736,0,5.12-1.475,6.43-3.665
+		L14.136,12.076z"/>
+	<!-- always rotate this -->
+	<animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 9 9" to="360 9 9" dur="3s" additive="sum" repeatCount="indefinite" />
+</g>
+</svg>

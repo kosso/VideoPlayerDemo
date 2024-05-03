@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
-
+import { PlayerScreen } from './src/PlayerScreen';
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+      <PlayerScreen></PlayerScreen>
     </View>
   );
 }
@@ -15,4 +15,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  text: {
+    fontSize: 40,
+  }
 });
