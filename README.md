@@ -20,4 +20,8 @@ Clone this repo and cd into it..
 
 ----------------
 
+![screenshot](screenshot.png)
+
+----------------
+
 @kosso - 3 May, 2024
