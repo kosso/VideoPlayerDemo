@@ -7,7 +7,7 @@ import {
     VideoFullscreenUpdate,
 } from 'expo-av';
 import { Controls } from './Controls';
-import { View, useTVEventHandler, StyleSheet, TVEventControl, ImageBackground } from 'react-native';
+import { View, Text, useTVEventHandler, StyleSheet, TVEventControl, ImageBackground } from 'react-native';
 
 
 type Status = Partial<AVPlaybackStatus> & {
@@ -84,7 +84,7 @@ export const PlayerScreen = ({ }) => {
     };
 
     useTVEventHandler(evt => {
-        if (evt && evt.eventType && videoItem_Ref.current && video && status.current.isLoaded) {
+        if (evt && evt.eventType && video && status.current.isLoaded) {
             // console.log('TV Event', evt)
             // console.log('currentFocus', currentFocus.current)
             /*
@@ -98,7 +98,7 @@ export const PlayerScreen = ({ }) => {
             if (_eventType === 'pan') {
                 // console.log(evt?.body)
                 const _direction = determineGestureDirection(evt?.body?.velocityX, evt?.body?.velocityY)
-                console.log('pan', _direction)
+                // console.log('pan', _direction)
                 _eventType = _direction;
             }
             switch (_eventType) {
@@ -107,7 +107,7 @@ export const PlayerScreen = ({ }) => {
                 //     break;
                 case 'up':
                 case 'swipeUp':
-                    console.log('UP')
+                    // console.log('UP')
                     // if (showControlsRef.current && currentFocus && currentFocus.current === 'topBorder') {
                     //     //console.log('HIDE CONTROLS')
                     //     setControls(false)
@@ -125,25 +125,25 @@ export const PlayerScreen = ({ }) => {
                 case 'swipeLeft':
                     // if (showControlsRef.current) {
                     //     resetControlsTimeout()
-                    //     if (status && currentFocus && currentFocus.current === 'progressThumb') {
-                    //         let _pos_ms = status.current.positionMillis - _skip_ms
-                    //         if (_pos_ms < 0) return
-                    //         // console.log('LEFT - rewind 5 seconds', status.current.positionMillis, _pos_ms)
-                    //         video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
-                    //     }
+                        if (status && currentFocusName && currentFocusName.current === 'progressThumb') {
+                            let _pos_ms = status.current.positionMillis - _skip_ms
+                            if (_pos_ms < 0) return
+                            console.log('LEFT - rewind 5 seconds', status.current.positionMillis, _pos_ms)
+                            video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
+                        }
                     // }
                     break;
                 case 'right':
                 case 'swipeRight':
                     // if (showControlsRef.current) {
                     //     resetControlsTimeout()
-                    //     if (status && currentFocus && currentFocus.current === 'progressThumb') {
-                    //         let _pos_ms = status.current.positionMillis + _skip_ms
-                    //         if (_pos_ms > status.current.playableDurationMillis) _pos_ms = status.current.playableDurationMillis
-                    //         if (_pos_ms > status.current.durationMillis) return
-                    //         // console.log('RIGHT - forward 15 seconds', status.current.positionMillis, _pos_ms, status.current.durationMillis)
-                    //         video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
-                    //     }
+                        if (status && currentFocusName && currentFocusName.current === 'progressThumb') {
+                            let _pos_ms = status.current.positionMillis + _skip_ms
+                            if (_pos_ms > status.current.playableDurationMillis) _pos_ms = status.current.playableDurationMillis
+                            if (_pos_ms > status.current.durationMillis) return
+                            console.log('RIGHT - forward 15 seconds', status.current.positionMillis, _pos_ms, status.current.durationMillis)
+                            video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
+                        }
                     // }
                     break;
                 default:
@@ -152,8 +152,7 @@ export const PlayerScreen = ({ }) => {
 
             // Spacebar on sim and center select button.
             if (evt?.eventType === 'playPause') {
-                // console.log('calling playpause');
-                // playPause();
+                playPause();
             }
         }
     });
@@ -165,7 +164,7 @@ export const PlayerScreen = ({ }) => {
     useEffect(() => {
         const setup = async () => {
             // Will run before onLayoutRootView. And on every file save while developing. 
-            console.log('useEffect setup');
+            // console.log('useEffect setup');
 
             // If this component gets used as a Screen in a Navigation.Stack
             /*
@@ -187,7 +186,15 @@ export const PlayerScreen = ({ }) => {
         setup()
     }, [])
 
-    
+    const playPause = () => {
+        // console.log('playPause', status.current)
+        if (status.current?.isPlaying) {
+            video.current.pauseAsync();
+        } else {
+            video.current.playAsync();
+        }
+    };
+
     const resetVideo = async () => {
         await video.current.stopAsync()
         await video.current.setStatusAsync(defaultStatus)
@@ -218,6 +225,9 @@ export const PlayerScreen = ({ }) => {
             console.log('VIDEO ERROR!', newStatus?.error)
             return
         }
+        // if(newStatus?.isBuffering){
+        //     console.log('Buffering')
+        // }
         if (newStatus?.isLoaded) {
             if (newStatus?.didJustFinish) {
                 await video.current.stopAsync().catch(err => {})
@@ -241,9 +251,22 @@ export const PlayerScreen = ({ }) => {
         }
         status.current = newStatus
     }
+
+    const Buffering = () => {
+        return (
+            <View style={{ zIndex: 20, display:'flex',gap:30, alignItems:'center', justifyContent:'center', backgroundColor:'yellow', padding:20, paddingLeft:30, paddingRight:30, borderRadius:99, position:'absolute', top:100, marginLeft:'auto', marginRight:'auto'}}>
+                <Text style={{ color:'black', fontWeight:'bold', fontSize:30, textTransform:'uppercase' }}>Buffering</Text>
+            </View>
+        )
+    }
+
+
     return (
         <View style={styles.screen} onLayout={onLayoutRootView}>
             <ImageBackground source={backgroundImage} resizeMode='cover' style={styles.full} />
+            {
+                // <Buffering></Buffering>
+            }
             <Video style={styles.video}
                 ref={video}
                 source={videoSource}
