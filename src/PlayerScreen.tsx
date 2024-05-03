@@ -4,7 +4,6 @@ import {
     Video,
     ResizeMode,
     AVPlaybackStatus,
-    VideoFullscreenUpdate,
 } from 'expo-av';
 import { Controls } from './Controls';
 import { View, Text, useTVEventHandler, StyleSheet, TVEventControl, ImageBackground } from 'react-native';
@@ -22,8 +21,8 @@ type Status = Partial<AVPlaybackStatus> & {
     durationMillis?: number;
     error?:string;
     // custom
-    progressPercentage?: string; // string with '%' as DimensionValue
-    playablePercentage?: string; // 
+    progressPercentage?: string; // custom strings with '%' as DimensionValue 
+    playablePercentage?: string; // set during player status updates
 };
 
 const defaultStatus = {
@@ -279,19 +278,11 @@ export const PlayerScreen = ({ }) => {
         // Note: while developing, a file save will not run this again after the app renders. The useEffect will.
         // Expo: Click 'R' to do a full reload.
         console.log('onLayoutRootView')
-        
-        // LIVE Amazing TV Hls : https://178475.gvideo.io/mpegts/178475_695019/master_mpegts.m3u8'
-        // setVideoSource({
-        //     uri: 'https://test-streams.mux.dev/pts_shift/master.m3u8',
-        //     type: 'hls'
-        // });
 
-        if(playlist?.length){
-
-       //     setVideoSource( playlist[indexRef.current].source )
-
+        // Initial load now... 
+        if(playlist?.length && playlist[indexRef.current]){
+            setVideoSource( playlist[indexRef.current].source )
         }
-
 
     }, [])
 
