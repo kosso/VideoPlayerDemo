@@ -11,7 +11,7 @@ import IconStop from '@assets/icons/stop_no_circle.svg'
 import IconSkipPrev from '@assets/icons/skip_previous.svg'
 import IconSkipNext from '@assets/icons/skip_next.svg'
 
-export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextItem }) => {
+export const Controls = ({ show, onMount, togglePlayPause, playPreviousItem, playNextItem }) => {
 
 
     const [currentStatus, setCurrentStatus] = useState<Status>();
@@ -27,7 +27,7 @@ export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextI
     const currentFocusNameRef = useRef('')
     // Mostly did this for debugging.
     const _setCurrentFocusName = (name: string) => {
-        // console.log('_setCurrentFocusName', name)
+        console.log('_setCurrentFocusName', name)
         currentFocusNameRef.current = name
     }
 
@@ -39,6 +39,26 @@ export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextI
     useEffect(() => {
         onMount([setCurrentStatus, setVideoItemData, currentFocusNameRef])
     }, [onMount]);
+
+    // Animation 
+    let slideAnimation = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        if (show) {
+            // console.log('Controls: show controls slideAnimation ...');
+            Animated.timing(slideAnimation, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true
+            }).start();
+        } else {
+            // console.log('Controls: hide controls slideAnimation...')
+            Animated.timing(slideAnimation, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true
+            }).start();
+        }
+    }, [show]);
 
     const ControlButton = useMemo(() => {
         return ({ Icon, _ref, name, hpf = false, size = 120, iconSize = 100, callback = null }) => {
@@ -64,7 +84,16 @@ export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextI
     }, [])
 
     return (
-        <View style={styles.controlsCont} onLayout={onLayoutControls}>
+        <Animated.View onLayout={onLayoutControls} style={[styles.controlsCont, { opacity: slideAnimation }, , { transform: [{ translateY: slideAnimation.interpolate({ inputRange: [0, 1], outputRange: [330, 0] }) }] }]}>
+            {/* Invisible TVFocusGuideView to trick the open/close logic */}
+            <TVFocusGuideView style={{ height: 16, position: 'absolute', top: -10, left: 10, right: 10, zIndex: 5 }}>
+                <Pressable
+                    ref={topBorderRef} key={'topBorder'}
+                    isTVSelectable={true}
+                    style={[{ width: '100%', height: 10 }]}
+                    onFocus={() => { _setCurrentFocusName('topBorder') }}
+                ></Pressable>
+            </TVFocusGuideView>
             {/* Backdrop to blur the video in the backgorund */}
             <BlurView intensity={8} tint='systemMaterialDark' style={styles.blurViewBg}></BlurView>
 
@@ -127,7 +156,7 @@ export const Controls = ({ onMount, togglePlayPause, playPreviousItem, playNextI
 
 
 
-        </View>
+        </Animated.View>
     )
 }
 

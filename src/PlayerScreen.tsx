@@ -64,6 +64,7 @@ interface PlaylistItem {
     source: VideoSource
 }
 
+let _controls_timeout;
 
 export const PlayerScreen = ({ }) => {
     // Fast-Forward/Rewind skip amount
@@ -119,6 +120,33 @@ export const PlayerScreen = ({ }) => {
         currentFocusName = dataFromChild[2]
     };
 
+    const showControlsRef = useRef<boolean>(false);
+    const [showControls, setShowControls] = useState<boolean>(false);
+
+    const startControlsTimeout = () => {
+        // return // hold up while building the ui..
+        _controls_timeout = setTimeout(() => {
+            setControls(false)
+        }, 8000)
+    }
+
+    const resetControlsTimeout = () => {
+        _controls_timeout && clearInterval(_controls_timeout)
+        startControlsTimeout()
+    }
+
+    const setControls = (show: boolean) => {
+        _controls_timeout && clearInterval(_controls_timeout)
+        showControlsRef.current = show
+        // console.log('show controls is now', showControlsRef.current)
+        setShowControls(showControlsRef.current)
+
+        if (showControlsRef.current) {
+            // console.log('PlayerScreen: showcontrols animation...', showControlsRef.current);
+            startControlsTimeout()
+        }
+    }
+
     useTVEventHandler(evt => {
         if (evt && evt.eventType && video && status.current.isLoaded) {
             // console.log('TV Event', evt)
@@ -143,36 +171,36 @@ export const PlayerScreen = ({ }) => {
                 //     break;
                 case 'up':
                 case 'swipeUp':
-                    // console.log('UP')
-                    // if (showControlsRef.current && currentFocus && currentFocus.current === 'topBorder') {
-                    //     //console.log('HIDE CONTROLS')
-                    //     setControls(false)
-                    // }
+                    console.log('UP')
+                    if (showControlsRef.current && currentFocusName && currentFocusName.current === 'topBorder') {
+                        console.log('HIDE CONTROLS')
+                         setControls(false)
+                    }
                     break;
                 case 'down':
                 case 'swipeDown':
-                    // console.log('DOWN')
-                    // if (!showControlsRef.current) {
-                    //     //console.log('SHOW CONTROLS')
-                    //     setControls(true)
-                    // }
+                    console.log('DOWN')
+                    if (!showControlsRef.current) {
+                        console.log('SHOW CONTROLS')
+                        setControls(true)
+                    }
                     break;
                 case 'left':
                 case 'swipeLeft':
-                    // if (showControlsRef.current) {
-                    //     resetControlsTimeout()
+                    if (showControlsRef.current) {
+                        resetControlsTimeout()
                         if (status && currentFocusName && currentFocusName.current === 'progressThumb') {
                             let _pos_ms = status.current.positionMillis - _skip_ms
                             if (_pos_ms < 0) return
                             console.log('LEFT - rewind 5 seconds', status.current.positionMillis, _pos_ms)
                             video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
                         }
-                    // }
+                    }
                     break;
                 case 'right':
                 case 'swipeRight':
-                    // if (showControlsRef.current) {
-                    //     resetControlsTimeout()
+                    if (showControlsRef.current) {
+                        resetControlsTimeout()
                         if (status && currentFocusName && currentFocusName.current === 'progressThumb') {
                             let _pos_ms = status.current.positionMillis + _skip_ms
                             if (_pos_ms > status.current.playableDurationMillis) _pos_ms = status.current.playableDurationMillis
@@ -180,7 +208,7 @@ export const PlayerScreen = ({ }) => {
                             console.log('RIGHT - forward 15 seconds', status.current.positionMillis, _pos_ms, status.current.durationMillis)
                             video.current.setStatusAsync({ positionMillis: _pos_ms }).catch(err => {})
                         }
-                    // }
+                    }
                     break;
                 default:
                     break;
@@ -253,6 +281,7 @@ export const PlayerScreen = ({ }) => {
         setPosterSource(playlist[atIndex].posterSource ? playlist[atIndex].posterSource : defaultPosterSource)
         setVideoSource(playlist[atIndex].source)
         await video.current.playAsync();
+        setControls(true)
     }
 
     const playNextItem = async () => {
@@ -281,7 +310,9 @@ export const PlayerScreen = ({ }) => {
 
         // Initial load now... 
         if(playlist?.length && playlist[indexRef.current]){
-            setVideoSource( playlist[indexRef.current].source )
+            // setVideoSource( playlist[indexRef.current].source )
+            indexRef.current = 0
+            playVideoItem(0)
         }
 
     }, [])
@@ -349,7 +380,7 @@ export const PlayerScreen = ({ }) => {
                 onPlaybackStatusUpdate={onPlaybackStatusUpdate}
 
             ></Video>
-            <Controls onMount={onControlsViewMount} togglePlayPause={togglePlayPause} playNextItem={playNextItem} playPreviousItem={playPreviousItem}></Controls>
+            <Controls show={showControls} onMount={onControlsViewMount} togglePlayPause={togglePlayPause} playNextItem={playNextItem} playPreviousItem={playPreviousItem}></Controls>
             
         </View>
 
