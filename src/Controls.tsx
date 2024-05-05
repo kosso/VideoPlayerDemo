@@ -27,7 +27,7 @@ export const Controls = ({ show, onMount, togglePlayPause, playPreviousItem, pla
     const currentFocusNameRef = useRef('')
     // Mostly did this for debugging.
     const _setCurrentFocusName = (name: string) => {
-        console.log('_setCurrentFocusName', name)
+        // console.log('_setCurrentFocusName', name)
         currentFocusNameRef.current = name
     }
 

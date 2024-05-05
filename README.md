@@ -48,4 +48,8 @@ Clone this repo and cd into it..
 
 ----------------
 
+Just added the abiltiy to show/hide the controls with an up/down button push or swipe. First time I've tried an animation. I could be doing something horribly wrong. YMMV.
+
+----------------
+
 @kosso - 3 May, 2024

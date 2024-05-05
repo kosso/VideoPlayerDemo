@@ -8,6 +8,20 @@ import {
 import { Controls } from './Controls';
 import { View, Text, useTVEventHandler, StyleSheet, TVEventControl, ImageBackground } from 'react-native';
 
+// Typings bug fix
+type HWEvent = {
+    eventType: 'up' | 'down' | 'right' | 'left' | 'longUp' | 'longDown' | 'longRight' | 'longLeft' | 'blur' | 'focus' | 'pan' | string;
+    eventKeyAction?: -1 | 1 | 0 | number | undefined;
+    tag?: number | undefined;
+    body?: {
+      state: 'Began' | 'Changed' | 'Ended',
+      x: number,
+      y: number,
+      velocityX: number, // These are incorrectly defined in the react-native/typee/public/ReactNativeTVTypes.d.ts 
+      velocityY: number
+    } | undefined
+  };
+
 
 type Status = Partial<AVPlaybackStatus> & {
     isPlaying?: boolean;
@@ -147,7 +161,7 @@ export const PlayerScreen = ({ }) => {
         }
     }
 
-    useTVEventHandler(evt => {
+    useTVEventHandler((evt:HWEvent) => {
         if (evt && evt.eventType && video && status.current.isLoaded) {
             // console.log('TV Event', evt)
             // console.log('currentFocus', currentFocus.current)
@@ -334,7 +348,8 @@ export const PlayerScreen = ({ }) => {
                 setStatus(status.current)
                 setVideoSource({ uri: null })
                 // autoplay another video ... 
-                // playNextItem() ... 
+                
+                playNextItem() 
             }
 
             if (newStatus.durationMillis) {
